@@ -22,7 +22,7 @@ frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs18.x # 14, 16, 18
   lambdaHashingVersion: 20201221
 
 # you can overwrite defaults here
@@ -78,6 +78,13 @@ functions:
       - httpApi:
           path: /product
           method: post
+  getProduct:
+    handler: src/handlers.getProduct
+    events:
+      - httpApi:
+          path: /product/{id} # specific product in the path
+          method: get
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
