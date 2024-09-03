@@ -19,7 +19,7 @@ export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
   try {
     const reqBody = JSON.parse(event.body as string);
 
-    await schema.validate(reqBody);
+    await schema.validate(reqBody, { abortEarly: false }); //get all errors not just failed ones name, description, price, available
 
     const product = {
       ...reqBody,
@@ -66,11 +66,21 @@ const fetchProductById = async (id: string) => {
 };
 
 const handleError = (e: unknown) => {
+  if (e instanceof yup.ValidationError) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({
+        errors: e.errors,
+      }),
+    };
+  }
+
   if (e instanceof SyntaxError) {
     return {
       statusCode: 400,
       headers,
-      body: `invalid request body format : "${e.message}"`,
+      body: JSON.stringify({ error: `invalid request body format : "${e.message}"` }),
     };
   }
 
@@ -118,7 +128,8 @@ export const updateProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
     await fetchProductById(id);
 
     const reqBody = JSON.parse(event.body as string);
-    await schema.validate(reqBody);
+
+    await schema.validate(reqBody, { abortEarly: false });
 
     const product = {
       ...reqBody,
