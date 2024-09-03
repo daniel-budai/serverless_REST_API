@@ -23,17 +23,39 @@ export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
 };
 
 export const getProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const id = event.pathParameters?.id; //? because id may be undefined
+  try {
+    const id = event.pathParameters?.id;
 
-  const output = await docClient.get({ TableName: "tableName", Key: { productID: id } }).promise();
-  if (!output.Item) {
+    if (!id) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Product ID is required" }),
+      };
+    }
+
+    const params = {
+      TableName: "ProductsTable",
+      Key: { productID: id },
+    };
+
+    const result = await docClient.get(params).promise();
+
+    if (!result.Item) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Product not found" }),
+      };
+    }
+
     return {
-      statusCode: 404,
-      body: JSON.stringify({ message: "Product not found" }),
+      statusCode: 200,
+      body: JSON.stringify(result.Item),
+    };
+  } catch (error) {
+    console.error("Error getting product:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Internal Server Error" }),
     };
   }
-  return {
-    statusCode: 200,
-    body: JSON.stringify(output.Item),
-  };
 };
