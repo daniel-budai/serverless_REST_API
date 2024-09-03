@@ -1,15 +1,25 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
+import * as yup from "yup";
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 const headers = {
   "content-type": "application/json",
 };
 
+const schema = yup.object().shape({
+  name: yup.string().required(),
+  description: yup.string().required(),
+  price: yup.number().required(),
+  available: yup.boolean().required(),
+});
+
 export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const reqBody = JSON.parse(event.body as string);
+
+    await schema.validate(reqBody);
 
     const product = {
       ...reqBody,
@@ -108,6 +118,7 @@ export const updateProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
     await fetchProductById(id);
 
     const reqBody = JSON.parse(event.body as string);
+    await schema.validate(reqBody);
 
     const product = {
       ...reqBody,
