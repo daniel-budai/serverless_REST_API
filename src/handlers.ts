@@ -8,27 +8,31 @@ const headers = {
 };
 
 export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const reqBody = JSON.parse(event.body as string);
+  try {
+    const reqBody = JSON.parse(event.body as string);
 
-  const product = {
-    ...reqBody,
-    productID: v4(),
-  };
+    const product = {
+      ...reqBody,
+      productID: v4(),
+    };
 
-  const tableName = "ProductsTable";
+    const tableName = "ProductsTable";
 
-  await docClient
-    .put({
-      TableName: tableName,
-      Item: product,
-    })
-    .promise();
+    await docClient
+      .put({
+        TableName: tableName,
+        Item: product,
+      })
+      .promise();
 
-  return {
-    statusCode: 201, // 201 Created
-    headers,
-    body: JSON.stringify(product),
-  };
+    return {
+      statusCode: 201, // 201 Created
+      headers,
+      body: JSON.stringify(product),
+    };
+  } catch (e) {
+    return handleError(e);
+  }
 };
 
 class HttpError extends Error {
@@ -52,6 +56,14 @@ const fetchProductById = async (id: string) => {
 };
 
 const handleError = (e: unknown) => {
+  if (e instanceof SyntaxError) {
+    return {
+      statusCode: 400,
+      headers,
+      body: `invalid request body format : "${e.message}"`,
+    };
+  }
+
   if (e instanceof HttpError) {
     return {
       statusCode: e.statusCode,
