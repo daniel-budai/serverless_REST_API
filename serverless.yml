@@ -22,7 +22,7 @@ frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   region: us-east-1
   iam:
     role:
@@ -94,6 +94,24 @@ functions:
     events:
       - httpApi:
           path: /product/{id} # specific product in the path
+          method: get
+  updateProduct:
+    handler: src/handlers.updateProduct
+    events:
+      - httpApi:
+          path: /product/{id}
+          method: put
+  deleteProduct:
+    handler: src/handlers.deleteProduct
+    events:
+      - httpApi:
+          path: /product/{id}
+          method: delete
+  listProduct:
+    handler: src/handlers.listProduct
+    events:
+      - httpApi:
+          path: /products
           method: get
 
 #    The following are a few example events you can configure
