@@ -3,6 +3,9 @@ import AWS from "aws-sdk";
 import { v4 } from "uuid";
 
 const docClient = new AWS.DynamoDB.DocumentClient();
+const headers = {
+  "content-type": "application/json",
+};
 
 export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const reqBody = JSON.parse(event.body as string);
@@ -23,6 +26,7 @@ export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
 
   return {
     statusCode: 201, // 201 Created
+    headers,
     body: JSON.stringify(product),
   };
 };
@@ -51,6 +55,7 @@ const handleError = (e: unknown) => {
   if (e instanceof HttpError) {
     return {
       statusCode: e.statusCode,
+      headers,
       body: e.message,
     };
   }
@@ -64,6 +69,7 @@ export const getProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewa
     if (!id) {
       return {
         statusCode: 400,
+        headers,
         body: JSON.stringify({ message: "Product ID is required" }),
       };
     }
@@ -74,6 +80,7 @@ export const getProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewa
     }
     return {
       statusCode: 200,
+      headers,
       body: JSON.stringify(output.Item),
     };
   } catch (error) {
@@ -106,6 +113,7 @@ export const updateProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
 
     return {
       statusCode: 200,
+      headers,
       body: JSON.stringify(product),
     };
   } catch (e) {
@@ -134,6 +142,7 @@ export const listProduct = async (event: APIGatewayProxyEvent): Promise<APIGatew
   const output = await docClient.scan({ TableName: "ProductsTable" }).promise();
   return {
     statusCode: 200,
+    headers,
     body: JSON.stringify(output.Items),
   };
 };
