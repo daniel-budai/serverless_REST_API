@@ -22,8 +22,19 @@ frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs18.x # 14, 16, 18
-  lambdaHashingVersion: 20201221
+  runtime: nodejs14.x
+  region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+          Resource:
+            - arn:aws:dynamodb:us-east-1:*:table/ProductsTable
 
 # you can overwrite defaults here
 #  stage: dev
@@ -47,17 +58,17 @@ provider:
 #                - "Ref" : "ServerlessDeploymentBucket"
 #                - "/*"
 
-iam:
-  role:
-    statements:
-      - Effect: Allow
-        Action:
-          - "dynamodb:PutItem"
-          - "dynamodb:GetItem"
-          - "dynamodb:DeleteItem"
-          - "dynamodb:Scan"
-        Resource:
-          - { "Fn::GetAtt": ["ProductsTable", "Arn"] }
+# iam:
+#   role:
+#     statements:
+#       - Effect: Allow
+#         Action:
+#           - "dynamodb:PutItem"
+#           - "dynamodb:GetItem"
+#           - "dynamodb:DeleteItem"
+#           - "dynamodb:Scan"
+#         Resource:
+#           - { "Fn::GetAtt": ["ProductsTable", "Arn"] }
 
 # you can define service wide environment variables here
 #  environment:
